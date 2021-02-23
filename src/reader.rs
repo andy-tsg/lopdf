@@ -166,7 +166,13 @@ impl<'a> Reader<'a> {
                 .filter_map(entries_filter_map)
                 .collect();
         }
-        self.document.objects.extend(object_streams.into_inner().unwrap());
+		
+        // this is neccessary to avoid overwriting existing objects
+        for (key, value) in object_streams.into_inner().unwrap() {
+            self.document.objects.entry(key).or_insert(value);
+        }
+		
+        //self.document.objects.extend(object_streams.into_inner().unwrap());
 
         for object_id in zero_length_streams.into_inner().unwrap() {
             let _ = self.set_stream_content(object_id);
